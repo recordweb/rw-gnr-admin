@@ -101,3 +101,4 @@ Error responses have the shape `{ errorCode, message }`.
 ## Relationship to the PoC (`root-resolver-testnet`)
 
 This app is an adaptation of the admin app prototyped in `recordweb/root-resolver-testnet` (`admin-app/`), migrated from the retired testnet chaincode API (arbitrary caller-supplied identity string, caller-supplied namespace, unrestricted `GetAllNamespaces`) to the hardened production `rw-cc-gnr` API described above. It is intended as a reference implementation for other RecordWeb admin tooling.
+
