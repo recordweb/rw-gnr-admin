@@ -1,0 +1,60 @@
+name: Deploy rw-gnr-admin to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Docker Compose service to start (or "all")'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - rw-gnr-admin
+          - all
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/rw-gnr-admin
+
+            git -c http.version=HTTP/1.1 fetch origin
+            git reset --hard origin/main
+
+            # backend/.env is never committed (see .gitignore) - it must
+            # already exist on the VPS with this organisation's own Fabric
+            # identity/paths filled in. Fail fast with a clear message
+            # instead of a confusing Fabric connection error later.
+            if [ ! -f backend/.env ]; then
+              echo "ERROR: backend/.env is missing on the VPS." >&2
+              echo "Copy backend/.env.example to backend/.env and fill in this organisation's values before deploying." >&2
+              exit 1
+            fi
+
+            SERVICE="${{ github.event.inputs.service }}"
+
+            # Rebuild is required (unlike static Fabric node images): this
+            # service's image is built FROM the repo's own source on every
+            # deploy, so a plain `up -d` without a preceding `build` would
+            # keep serving the previously built image and silently ignore
+            # the new commit.
+            if [ -z "$SERVICE" ] || [ "$SERVICE" = "all" ]; then
+              docker compose build
+              docker compose up -d
+            else
+              docker compose build "$SERVICE"
+              docker compose up -d "$SERVICE"
+            fi
+
+            docker compose ps
