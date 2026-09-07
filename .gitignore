@@ -1,0 +1,31 @@
+# --- Secrets / environment -----------------------------------------------
+backend/.env
+.env
+.env.local
+
+# --- Crypto material (never commit identities/keys) -----------------------
+crypto-config/
+**/*.pem
+**/*.key
+**/priv_sk
+
+# --- Node -------------------------------------------------------------------
+node_modules/
+backend/node_modules/
+npm-debug.log*
+package-lock.json.bak
+
+# --- Logs -------------------------------------------------------------------
+*.log
+logs/
+
+# --- OS / editor cruft --------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+
+# --- Build artefacts (none expected, frontend has no build step, but just
+#     in case a future refactor introduces one) ------------------------------
+dist/
+build/

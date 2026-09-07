@@ -1,0 +1,61 @@
+# =============================================================================
+# docker-compose.yml - rw-gnr-admin (standalone Compose project)
+# -----------------------------------------------------------------------------
+# Deliberately its own Compose project (own repo, own project name, own
+# primary network) - NOT folded into rw-rrn's docker-compose.yml. This
+# demonstrates that rw-gnr-admin is an independent deployable, consistent
+# with "every organisation runs its own instance, scoped to its own Fabric
+# identity". It only needs to reach one thing from the rw-rrn deployment: the
+# gateway peer's gRPC port - achieved by additionally joining rw-rrn's
+# existing `fabric_net` Docker network (Docker allows a container to belong
+# to more than one network at once), so no ports need to be published on the
+# host and rw-rrn's compose file does not need to know about this service.
+#
+# Both /opt/rw-rrn and /opt/rw-gnr-admin are expected to live under /opt/ on
+# the same VPS, deployed via the same SSH user.
+#
+# Prerequisite: rw-rrn's docker-compose.yml must already define a network
+# named `fabric_net` (this is already the case per the PoC's admin-app
+# README). That network must exist (i.e. rw-rrn's stack must be up) before
+# this project is started, since `external: true` below only attaches to an
+# existing network rather than creating one.
+# =============================================================================
+
+name: rw-gnr-admin
+
+services:
+  rw-gnr-admin:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: rw-gnr-admin
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      FRONTEND_DIR: /app/frontend
+    volumes:
+      # Read-only mount of this organisation's own crypto material, matching
+      # the paths referenced by PEER_TLS_CA_PATH / CERT_PATH / KEY_PATH in
+      # backend/.env. Adjust the host-side source path to wherever this
+      # organisation's crypto-config actually lives on the VPS.
+      - ${CRYPTO_CONFIG_HOST_PATH:-/opt/rw-rrn/crypto-config}:/app/crypto:ro
+    ports:
+      # Exposed on the host so the admin UI is reachable directly; adjust or
+      # remove if you prefer to front this with a reverse proxy instead.
+      - "3000:3000"
+    networks:
+      # Primary network: own, isolated, brought up by this project itself -
+      # demonstrates that rw-gnr-admin does not depend on rw-rrn's compose
+      # file to exist or be reachable except via the one bridge below.
+      - rw-gnr-admin-net
+      # Secondary network: joins rw-rrn's existing Fabric Docker network
+      # purely so the gateway peer's hostname resolves via Docker DNS. No
+      # other rw-rrn services are reachable or affected by this.
+      - fabric_net
+
+networks:
+  rw-gnr-admin-net:
+    driver: bridge
+  fabric_net:
+    external: true

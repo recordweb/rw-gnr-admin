@@ -1,0 +1,343 @@
+/* style.css - lean styling for the rw-gnr-admin frontend.
+   No CSS framework; focus on readability for desktop use. */
+
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --border: #d7dde3;
+  --text: #1f2933;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success-bg: #e7f6ec;
+  --success-fg: #1a7f37;
+  --error-bg: #fdecec;
+  --error-fg: #b42318;
+  --warn-bg: #fff7e6;
+  --warn-fg: #92610a;
+  --prod-fg: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.field-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.35rem 0 0.75rem;
+}
+
+/* Banner */
+.banner {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+.banner-warn {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  border: 1px solid #f2d38a;
+}
+
+/* Buttons */
+.btn {
+  font: inherit;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn:hover {
+  border-color: var(--primary);
+}
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--primary);
+}
+
+/* Topbar / layout */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.identity-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Network switch (radio buttons) */
+.network-switch {
+  display: flex;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.2rem;
+  margin: 0;
+}
+.network-option {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.network-option:has(input:checked) {
+  background: var(--primary);
+  color: #fff;
+}
+.network-option-restricted {
+  position: relative;
+}
+.network-option-restricted::after {
+  content: "⚠";
+  margin-left: 0.25rem;
+  color: var(--warn-fg);
+}
+.network-option:has(input:checked).network-option-restricted::after {
+  color: #fff;
+}
+
+.content {
+  max-width: 1100px;
+  margin: 1.5rem auto;
+  padding: 0 1.5rem;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.toolbar h1 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Messages */
+.message {
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+.message-success {
+  background: var(--success-bg);
+  color: var(--success-fg);
+  border: 1px solid #a7ddb8;
+}
+.message-error {
+  background: var(--error-bg);
+  color: var(--error-fg);
+  border: 1px solid #f2b8b3;
+}
+
+.loading {
+  color: var(--muted);
+  padding: 1rem 0;
+}
+
+/* Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  word-break: break-word;
+}
+.data-table th {
+  background: #eef2f6;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+.data-table td.actions {
+  white-space: nowrap;
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Dialogs */
+dialog {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.4);
+}
+dialog h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+dialog form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  margin-top: 0.5rem;
+}
+dialog form input {
+  width: 100%;
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+dialog form input:focus {
+  outline: 2px solid var(--primary);
+  border-color: var(--primary);
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+.dialog-error {
+  background: var(--error-bg);
+  color: var(--error-fg);
+  border: 1px solid #f2b8b3;
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* Registration result dialog */
+.result-namespace {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #eef2f6;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+}
+.result-namespace code {
+  font-size: 1.05rem;
+  background: none;
+  padding: 0;
+  word-break: break-all;
+  flex: 1;
+}
+.result-meta {
+  margin: 0.75rem 0 0;
+}
+.result-meta dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 0.6rem;
+}
+.result-meta dd {
+  margin: 0.15rem 0 0;
+  word-break: break-word;
+}
+
+/* History */
+.history-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.history-list li {
+  margin-bottom: 0.75rem;
+}
+.history-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  word-break: break-all;
+}
+.history-detail {
+  font-size: 0.95rem;
+}
