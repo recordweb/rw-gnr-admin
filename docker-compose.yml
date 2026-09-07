@@ -2,23 +2,32 @@
 # docker-compose.yml - rw-gnr-admin (standalone Compose project)
 # -----------------------------------------------------------------------------
 # Deliberately its own Compose project (own repo, own project name, own
-# primary network) - NOT folded into rw-rrn's docker-compose.yml. This
-# demonstrates that rw-gnr-admin is an independent deployable, consistent
-# with "every organisation runs its own instance, scoped to its own Fabric
-# identity". It only needs to reach one thing from the rw-rrn deployment: the
-# gateway peer's gRPC port - achieved by additionally joining rw-rrn's
-# existing `fabric_net` Docker network (Docker allows a container to belong
-# to more than one network at once), so no ports need to be published on the
-# host and rw-rrn's compose file does not need to know about this service.
+# primary network) - NOT folded into rw-rrn's or the PoC infra repo's
+# docker-compose.yml. This demonstrates that rw-gnr-admin is an independent
+# deployable, consistent with "every organisation runs its own instance,
+# scoped to its own Fabric identity".
 #
-# Both /opt/rw-rrn and /opt/rw-gnr-admin are expected to live under /opt/ on
-# the same VPS, deployed via the same SSH user.
+# It joins two EXTERNAL networks owned by other stacks, purely as bridges,
+# without requiring changes to those stacks' own compose files:
+#   - fabric_net  (from rw-rrn)      - so it can reach the Fabric gateway
+#                                        peer by its Docker DNS hostname.
+#   - tws-proxy   (from the infra    - so the shared nginx reverse proxy
+#     repo running nginx)              (container `poc-nginx`) can reach
+#                                        this container by its Docker DNS
+#                                        hostname, without rw-gnr-admin ever
+#                                        joining that repo's internal
+#                                        `poc_network`.
 #
-# Prerequisite: rw-rrn's docker-compose.yml must already define a network
-# named `fabric_net` (this is already the case per the PoC's admin-app
-# README). That network must exist (i.e. rw-rrn's stack must be up) before
-# this project is started, since `external: true` below only attaches to an
-# existing network rather than creating one.
+# Both /opt/rw-rrn and /opt/rw-gnr-admin (and the infra repo running nginx)
+# are expected to live under /opt/ on the same VPS, deployed via the same
+# SSH user.
+#
+# Prerequisites (both must already exist/be running before this project is
+# started, since `external: true` only attaches to existing networks rather
+# than creating them):
+#   - rw-rrn's docker-compose.yml must define a network named `fabric_net`.
+#   - The infra repo's docker-compose.yml must define the external network
+#     `tws-proxy` and nginx must already be attached to it.
 # =============================================================================
 
 name: rw-gnr-admin
@@ -40,22 +49,29 @@ services:
       # backend/.env. Adjust the host-side source path to wherever this
       # organisation's crypto-config actually lives on the VPS.
       - ${CRYPTO_CONFIG_HOST_PATH:-/opt/rw-rrn/crypto-config}:/app/crypto:ro
-    ports:
-      # Exposed on the host so the admin UI is reachable directly; adjust or
-      # remove if you prefer to front this with a reverse proxy instead.
-      - "3000:3000"
+    # No host port published: reached exclusively via nginx (tws-proxy),
+    # not directly. Remove the comment below and uncomment if you also want
+    # direct host access for debugging.
+    # ports:
+    #   - "3000:3000"
     networks:
       # Primary network: own, isolated, brought up by this project itself -
-      # demonstrates that rw-gnr-admin does not depend on rw-rrn's compose
-      # file to exist or be reachable except via the one bridge below.
+      # demonstrates that rw-gnr-admin does not depend on any other repo's
+      # compose file to exist, except via the two explicit bridges below.
       - rw-gnr-admin-net
-      # Secondary network: joins rw-rrn's existing Fabric Docker network
-      # purely so the gateway peer's hostname resolves via Docker DNS. No
-      # other rw-rrn services are reachable or affected by this.
+      # Bridge 1: joins rw-rrn's existing Fabric Docker network purely so
+      # the gateway peer's hostname resolves via Docker DNS.
       - fabric_net
+      # Bridge 2: joins the infra repo's existing nginx-facing network
+      # purely so nginx (container `poc-nginx`) can reach this container by
+      # its Docker DNS hostname (`rw-gnr-admin`) for proxy_pass.
+      - tws-proxy
 
 networks:
   rw-gnr-admin-net:
     driver: bridge
   fabric_net:
     external: true
+  tws-proxy:
+    external: true
+    name: tws-proxy
