@@ -86,10 +86,14 @@ export const config = {
 
   // Static frontend directory.
   frontendDir: env('FRONTEND_DIR', path.resolve(__dirname, '..', '..', 'frontend')),
+
+  // Admin credentials
+  adminUser: env('ADMIN_USER', ''),
+  adminPasswordHash: env('ADMIN_PASSWORD_HASH', ''),
 };
 
 export function assertConfigComplete() {
-  const required = ['peerEndpoint', 'peerHostAlias', 'mspId', 'peerTlsCaPath', 'certPath', 'keyPath'];
+  const required = ['peerEndpoint', 'peerHostAlias', 'mspId', 'peerTlsCaPath', 'certPath', 'keyPath', 'adminUser', 'adminPasswordHash'];
   const missing = required.filter((k) => !config[k]);
   if (missing.length > 0) {
     throw new Error(

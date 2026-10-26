@@ -6,12 +6,14 @@
 // =============================================================================
 
 import express from 'express';
-import cors from 'cors';
 import { config, assertConfigComplete, NETWORKS } from './config.js';
 import { namespacesRouter } from './routes/namespaces.js';
 import { listMyNamespaces } from './fabric/contract.js';
 import { closeGateway } from './fabric/gatewayClient.js';
 import { logger } from './logger.js';
+
+import { requireAdmin } from './auth/adminGuard.js';
+
 
 try {
   assertConfigComplete();
@@ -22,8 +24,20 @@ try {
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+
+// Öffentlich: nur Status, keine Details
+app.get('/api/health', async (_req, res) => {
+  try {
+    await listMyNamespaces('test');
+    res.json({ status: 'ok' });
+  } catch (err) {
+    logger.error('Health check failed', { error: err?.message });
+    res.status(503).json({ status: 'error' });
+  }
+});
+
+app.use(requireAdmin);
 
 app.use('/api/namespaces', namespacesRouter);
 
@@ -38,24 +52,6 @@ app.get('/api/config', (_req, res) => {
     allowProdWrites: config.allowProdWrites,
     networks: Object.values(NETWORKS).map(({ key, label }) => ({ key, label })),
   });
-});
-
-// Health check: evaluates GetMyNamespaces against the test network by
-// default (cheap read, never touches prod, works regardless of
-// ALLOW_PROD_WRITES).
-app.get('/api/health', async (_req, res) => {
-  try {
-    const namespaces = await listMyNamespaces('test');
-    res.json({
-      status: 'ok',
-      gateway: 'connected',
-      network: 'test',
-      namespaceCount: namespaces.length,
-    });
-  } catch (err) {
-    logger.error('Health check failed', { error: err?.message });
-    res.status(503).json({ status: 'error', gateway: 'unavailable', error: err?.message });
-  }
 });
 
 app.use(express.static(config.frontendDir));

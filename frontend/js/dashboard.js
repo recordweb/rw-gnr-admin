@@ -308,6 +308,8 @@ const ERROR_MESSAGES = {
   INVALID_RESOLVER_ENDPOINT: 'Invalid resolver endpoint.',
   INVALID_NETWORK_PARAMETER: 'Invalid network selection.',
   LEDGER_READ_FAILED: 'The ledger could not be read. Please try again shortly.',
+  UNAUTHORIZED: 'Login required. Please reload the page and sign in.',
+  TOO_MANY_ATTEMPTS: 'Too many failed logins. Please try again in 10 minutes.',
 };
 
 function describeError(err) {

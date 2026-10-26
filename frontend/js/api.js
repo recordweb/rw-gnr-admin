@@ -12,13 +12,16 @@ async function request(method, path, body) {
   try {
     response = await fetch(path, {
       method,
-      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      headers: {
+        'X-Requested-With': 'fetch',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+      },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new Error('Server unreachable. Is the backend running?');
   }
-
+  
   const text = await response.text();
   const data = text ? safeJson(text) : null;
 
