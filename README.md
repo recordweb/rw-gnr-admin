@@ -102,3 +102,15 @@ Error responses have the shape `{ errorCode, message }`.
 
 This app is an adaptation of the admin app prototyped in `recordweb/root-resolver-testnet` (`admin-app/`), migrated from the retired testnet chaincode API (arbitrary caller-supplied identity string, caller-supplied namespace, unrestricted `GetAllNamespaces`) to the hardened production `rw-cc-gnr` API described above. It is intended as a reference implementation for other RecordWeb admin tooling.
 
+## Admin Passwort ändern
+
+Auf einem Rechner mit Node.js (Repo geklont):
+
+```bash
+read -rs PASSWORD; export PASSWORD # mindestens 12 Zeichen
+node backend/tools/hash-password.js # gibt die Zeile ADMIN_PASSWORD_HASH=... aus
+# Alternativ ohne node: docker run --rm -e PASSWORD -v "$PWD/backend":/app:ro -w /app node:22-alpine node tools/hash-password.js
+unset PASSWORD
+```
+
+Die Zeile in `/opt/openrwp/.env` ersetzen und `cd /opt/openrwp && docker compose up -d --force-recreate`.
